@@ -1,0 +1,375 @@
+import { useMemo, useState } from 'react';
+import {
+  ArrowUpRight,
+  AudioLines,
+  BrainCircuit,
+  Check,
+  Command,
+  Cpu,
+  Globe,
+  Lock,
+  MessageSquareText,
+  Mic,
+  MoonStar,
+  Rocket,
+  ShieldCheck,
+  Sparkles,
+  Zap,
+} from 'lucide-react';
+
+const quickActions = {
+  en: [
+    'Open project dashboard',
+    'Create a marketing brief',
+    'Summarize my tasks',
+    'Schedule flight plan',
+  ],
+  bn: [
+    'ড্যাশবোর্ড খুলে দাও',
+    'মার্কেটিং ব্রিফ তৈরি করো',
+    'আমার কাজগুলো সারাংশ দাও',
+    'ফ্লাইট পরিকল্পনা সেট করো',
+  ],
+};
+
+const taskCards = {
+  en: [
+    { title: 'Research', status: 'Ready', value: '96%' },
+    { title: 'Automation', status: 'Running', value: 'Active' },
+    { title: 'Security', status: 'Protected', value: '24/7' },
+    { title: 'Workflow', status: 'Optimized', value: '99%' },
+  ],
+  bn: [
+    { title: 'গবেষণা', status: 'তৈরি', value: '96%' },
+    { title: 'অটোমেশন', status: 'চলছে', value: 'সক্রিয়' },
+    { title: 'নিরাপত্তা', status: 'সুরক্ষিত', value: '২৪/৭' },
+    { title: 'ওয়ার্কফ্লো', status: 'অপ্টিমাইজড', value: '৯৯%' },
+  ],
+};
+
+const systemMetrics = {
+  en: [
+    { label: 'Processing', value: '11.2k/sec' },
+    { label: 'Cognitive load', value: '38%' },
+    { label: 'Latency', value: '41 ms' },
+  ],
+  bn: [
+    { label: 'প্রসেসিং', value: '১১.২k/সেকেন্ড' },
+    { label: 'বুদ্ধিবৃত্তিক লোড', value: '৩৮%' },
+    { label: 'লেটেন্সি', value: '৪১ ms' },
+  ],
+};
+
+const initialMessages = {
+  en: [
+    { from: 'JARVIS', text: 'Good evening, sir. Systems are online and ready for your command.' },
+    { from: 'You', text: 'Create a complete action plan for my business workflow.' },
+  ],
+  bn: [
+    { from: 'জারভিস', text: 'শুভ সন্ধ্যা, স্যার। সিস্টেম অনলাইনে আছে এবং আপনার নির্দেশের প্রস্তুত।' },
+    { from: 'আপনি', text: 'আমার ব্যবসায়িক ওয়ার্কফ্লো জন্য সম্পূর্ণ একশন প্ল্যান তৈরি করো।' },
+  ],
+};
+
+const commandResponses = {
+  en: {
+    default: 'Command accepted. I am preparing the best possible workflow and will execute your instruction with precision.',
+    task: 'I have queued your task and I am optimizing the operational path for maximum efficiency.',
+    file: 'I have opened the necessary files and organized the latest updates for you.',
+    summary: 'Here is your summary: priorities are aligned, automation is active, and all critical systems are secure.',
+  },
+  bn: {
+    default: 'কমান্ড গ্রহণ করা হয়েছে। আমি সর্বোত্তম ওয়ার্কফ্লো প্রস্তুত করছি এবং আপনার নির্দেশ সঠিকভাবে সম্পাদন করব।',
+    task: 'আপনার টাস্ক কিউভ করা হয়েছে এবং সর্বোচ্চ কার্যকারিতা জন্য অপারেশনাল পথ অপ্টিমাইজ করছি।',
+    file: 'প্রয়োজনীয় ফাইলগুলো খুলে নিয়ে সর্বশেষ আপডেটগুলো সাজিয়ে দিয়েছি।',
+    summary: 'আপনার সারাংশ: প্রায়োরিটি ঠিক আছে, অটোমেশন সক্রিয়, এবং সব গুরুত্বপূর্ণ সিস্টেম নিরাপদ।',
+  },
+};
+
+function App() {
+  const [language, setLanguage] = useState('en');
+  const [command, setCommand] = useState('');
+  const [messages, setMessages] = useState(initialMessages.en);
+
+  const quickList = useMemo(() => quickActions[language], [language]);
+  const tasks = useMemo(() => taskCards[language], [language]);
+  const metrics = useMemo(() => systemMetrics[language], [language]);
+
+  const addCommand = (nextCommand) => {
+    const trimmed = nextCommand.trim();
+    if (!trimmed) return;
+
+    let responseText = commandResponses[language].default;
+    const lower = trimmed.toLowerCase();
+
+    if (lower.includes('task') || lower.includes('টাস্ক')) {
+      responseText = commandResponses[language].task;
+    } else if (lower.includes('file') || lower.includes('ফাইল')) {
+      responseText = commandResponses[language].file;
+    } else if (lower.includes('summary') || lower.includes('সারাংশ')) {
+      responseText = commandResponses[language].summary;
+    }
+
+    setMessages((prev) => [
+      ...prev,
+      { from: 'You', text: trimmed },
+      { from: language === 'en' ? 'JARVIS' : 'জারভিস', text: responseText },
+    ]);
+    setCommand('');
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    addCommand(command);
+  };
+
+  const statusText =
+    language === 'en'
+      ? 'AI core online • Bilingual ready • All systems secure'
+      : 'এআই কোর অনলাইন • দ্বিভাষিক প্রস্তুত • সিস্টেম নিরাপদ';
+
+  const uiText = {
+    en: {
+      nav: 'Mission Control',
+      assistant: 'JARVIS AI',
+      mode: 'Bilingual mode',
+      prompt: 'Issue your command',
+      send: 'Transmit',
+      quick: 'Quick actions',
+      summary: 'Operational Summary',
+      active: 'Active tasks',
+      commandLine: 'Enter command',
+      system: 'System logs',
+      voice: 'Voice control',
+      memory: 'AI memory',
+      action: 'Execute',
+    },
+    bn: {
+      nav: 'মিশন কন্ট্রোল',
+      assistant: 'জারভিস এআই',
+      mode: 'দ্বিভাষিক মোড',
+      prompt: 'আপনার কমান্ড দিন',
+      send: 'প্রেরণ',
+      quick: 'দ্রুত কাজ',
+      summary: 'অপারেশনাল সারাংশ',
+      active: 'সক্রিয় টাস্ক',
+      commandLine: 'কমান্ড লিখুন',
+      system: 'সিস্টেম লগ',
+      voice: 'ভয়েস কন্ট্রোল',
+      memory: 'এআই মেমরি',
+      action: 'এক্সিকিউট',
+    },
+  };
+
+  const currentText = uiText[language];
+
+  return (
+    <div className="app-shell">
+      <div className="bg-grid" />
+
+      <header className="topbar">
+        <div className="brand-block">
+          <div className="brand-mark">J</div>
+          <div>
+            <p className="label">{currentText.nav}</p>
+            <h1>{currentText.assistant}</h1>
+          </div>
+        </div>
+
+        <div className="top-actions">
+          <div className="status-pill">
+            <span className="status-dot" />
+            {statusText}
+          </div>
+          <div className="lang-toggle" aria-label="Language toggle">
+            <button
+              className={language === 'en' ? 'active' : ''}
+              onClick={() => {
+                setLanguage('en');
+                setMessages(initialMessages.en);
+              }}
+            >
+              EN
+            </button>
+            <button
+              className={language === 'bn' ? 'active' : ''}
+              onClick={() => {
+                setLanguage('bn');
+                setMessages(initialMessages.bn);
+              }}
+            >
+              BN
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="dashboard">
+        <aside className="sidebar panel">
+          <div className="panel-header">
+            <span className="mini-label">{currentText.memory}</span>
+            <Zap className="icon text-gold" size={16} />
+          </div>
+
+          <div className="module-list">
+            {[
+              { icon: BrainCircuit, label: language === 'en' ? 'Cognition' : 'জ্ঞান' },
+              { icon: ShieldCheck, label: language === 'en' ? 'Security' : 'নিরাপত্তা' },
+              { icon: Rocket, label: language === 'en' ? 'Launch' : 'লঞ্চ' },
+              { icon: Cpu, label: language === 'en' ? 'Core AI' : 'কোর এআই' },
+            ].map(({ icon: Icon, label }) => (
+              <button key={label} className="module-item">
+                <Icon size={18} className="text-gold" />
+                <span>{label}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="mini-panel">
+            <div className="panel-header compact">
+              <span className="mini-label">{currentText.voice}</span>
+              <Mic className="icon text-gold" size={16} />
+            </div>
+            <div className="voice-ring">
+              <AudioLines size={28} className="text-gold" />
+            </div>
+            <p>{language === 'en' ? 'Listening for next instruction' : 'পরবর্তী নির্দেশ শুনছি'}</p>
+          </div>
+        </aside>
+
+        <section className="main-panel panel">
+          <div className="panel-header">
+            <div>
+              <span className="mini-label">{currentText.summary}</span>
+              <h2>{currentText.mode}</h2>
+            </div>
+            <div className="online-tag">
+              <span className="status-dot" />
+              ONLINE
+            </div>
+          </div>
+
+          <div className="hero-card">
+            <div className="hero-copy">
+              <span className="eyebrow">{language === 'en' ? 'Autonomous intelligence' : 'স্বায়ত্তশাসিত বুদ্ধিমত্তা'}</span>
+              <h3>
+                {language === 'en'
+                  ? 'I assist with your work, your plans, and your decisions.'
+                  : 'আমি আপনার কাজ, পরিকল্পনা এবং সিদ্ধান্তে সহায়তা করি।'}
+              </h3>
+              <p>
+                {language === 'en'
+                  ? 'English and Bangla supported. I understand commands and manage tasks with precision.'
+                  : 'ইংরেজি ও বাংলা সমর্থিত। আমি কমান্ড বুঝে কাজ পরিচালনা করি দক্ষতার সাথে।'}
+              </p>
+            </div>
+            <div className="hero-visual">
+              <div className="orb animate-pulse-glow" />
+              <div className="ring ring-one" />
+              <div className="ring ring-two" />
+            </div>
+          </div>
+
+          <div className="quick-actions">
+            <p className="mini-label">{currentText.quick}</p>
+            <div className="quick-grid">
+              {quickList.map((item) => (
+                <button key={item} className="quick-btn" onClick={() => addCommand(item)}>
+                  <Command size={16} className="text-gold" />
+                  {item}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="command-box">
+            <input
+              type="text"
+              value={command}
+              onChange={(e) => setCommand(e.target.value)}
+              placeholder={currentText.commandLine}
+            />
+            <button type="submit">{currentText.send}</button>
+          </form>
+
+          <div className="chat-box">
+            <div className="chat-header">
+              <div className="chat-title">
+                <MessageSquareText size={16} className="text-gold" />
+                {currentText.system}
+              </div>
+              <button className="ghost-btn">
+                <ArrowUpRight size={14} />
+                {currentText.action}
+              </button>
+            </div>
+
+            <div className="chat-messages">
+              {messages.map((message, index) => (
+                <div
+                  key={`${message.from}-${index}`}
+                  className={`message ${message.from === 'You' || message.from === 'আপনি' ? 'user' : 'assistant'}`}
+                >
+                  <span className="message-label">{message.from}</span>
+                  <p>{message.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <aside className="rightbar panel">
+          <div className="panel-header">
+            <span className="mini-label">{currentText.active}</span>
+            <MoonStar className="icon text-gold" size={16} />
+          </div>
+
+          <div className="task-stack">
+            {tasks.map((task) => (
+              <div key={task.title} className="task-card">
+                <div className="task-content">
+                  <p>{task.title}</p>
+                  <span>{task.status}</span>
+                </div>
+                <strong>{task.value}</strong>
+              </div>
+            ))}
+          </div>
+
+          <div className="metrics-panel">
+            {metrics.map((metric) => (
+              <div key={metric.label} className="metric-row">
+                <span>{metric.label}</span>
+                <strong>{metric.value}</strong>
+              </div>
+            ))}
+          </div>
+
+          <div className="security-box">
+            <div className="security-head">
+              <Lock size={16} className="text-gold" />
+              <span>{language === 'en' ? 'Secure layer' : 'নিরাপত্তা স্তর'}</span>
+            </div>
+            <div className="shield-guard">
+              <ShieldCheck size={28} className="text-gold" />
+            </div>
+            <p>{language === 'en' ? 'All access points verified.' : 'সব অ্যাক্সেস পয়েন্ট যাচাই করা হয়েছে।'}</p>
+            <div className="check-list">
+              {['AI sync', 'Language ready', 'Task automation'].map((item) => (
+                <div key={item} className="check-item">
+                  <Check size={14} className="text-gold" />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </aside>
+      </main>
+    </div>
+  );
+}
+
+export default App;
+
+
+""
